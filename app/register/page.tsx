@@ -7,6 +7,10 @@ import { Input } from "@/components/ui/input"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import axios from 'axios'
+import { toast } from "sonner"
+import { Loader2Icon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Nama terlalu pendek" }),
@@ -20,10 +24,24 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(registerSchema) })
+  const router = useRouter()
 
   const onSubmit = async (data: any) => {
     console.log("Registering:", data)
-    // Kirim data ke backend: /api/register
+    try {
+      const response = await axios.post(`/api/register`, {
+        username: data?.name,
+        email: data?.email,
+        password: data?.password
+      })
+      if (response.status === 200) {
+        toast.success(response.data?.message || "Success register user")
+        router.push(`/login`)
+      }
+    } catch (error: any) {
+      console.log({ error });
+      toast.error(error?.response?.data?.error || "Terjadi kesalahan")
+    }
   }
 
   return (
@@ -51,7 +69,11 @@ export default function RegisterPage() {
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
           </div>
           <Button disabled={isSubmitting} type="submit" className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white">
-            Daftar
+            {
+              isSubmitting ?
+                <Loader2Icon className="animate-spin" /> :
+                "Daftar"
+            }
           </Button>
         </form>
 

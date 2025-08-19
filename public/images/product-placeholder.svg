@@ -1,0 +1,11 @@
+Jika Anda belum memiliki gambar default produk, Anda bisa membuatnya di folder public/images.
+
+Mari kita buat placeholder sederhana dengan SVG:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="300" version="1.1" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+ <rect width="300" height="300" fill="#f3f4f6"/>
+ <g transform="translate(100,100)" fill="#9ca3af">
+  <path d="m50 0c-27.614 0-50 22.386-50 50s22.386 50 50 50 50-22.386 50-50-22.386-50-50-50zm-12.5 25h25c6.925 0 12.5 5.575 12.5 12.5v25c0 6.925-5.575 12.5-12.5 12.5h-25c-6.925 0-12.5-5.575-12.5-12.5v-25c0-6.925 5.575-12.5 12.5-12.5z"/>
+ </g>
+</svg>

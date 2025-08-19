@@ -7,15 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Customer {
+  id        String   @id @default(cuid())
+  storeId   String
+  userId    String?
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  store     Store    @relation(fields: [storeId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Store {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  ownerId   String
+  createdAt DateTime   @default(now())
+  customers Customer[]
+  products  Product[]
+  owner     User       @relation(fields: [ownerId], references: [id])
+}
+
 model User {
   id           String         @id @default(cuid())
   email        String         @unique
-  username     String
-  passwordHash String
-  balance      Float          @default(0)
   createdAt    DateTime       @default(now())
+  balance      Float          @default(0)
+  passwordHash String
+  username     String
+  imageUrl     String?
   topUps       BalanceTopUp[]
+  customers    Customer[]
   orders       Order[]
+  stores       Store[]
 }
 
 model Category {
@@ -36,24 +62,37 @@ model Product {
   name        String
   description String
   price       Float
-  categoryId  String
-  providerId  String?
-  type        ProductType
-  active      Boolean          @default(true)
   createdAt   DateTime         @default(now())
+  active      Boolean          @default(true)
+  categoryId  String
+  storeId     String
+  providerId  String?
   orders      Order[]
+  images      ProductImage[]
   category    Category         @relation(fields: [categoryId], references: [id])
   provider    ServiceProvider? @relation(fields: [providerId], references: [id])
+  store       Store            @relation(fields: [storeId], references: [id])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  productId String
+  order     Int      @default(0) // For ordering the images, primary image is 0
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 model Order {
   id        String      @id @default(cuid())
   userId    String
-  productId String
   status    OrderStatus @default(PENDING)
-  target    String
-  response  Json?
   createdAt DateTime    @default(now())
+  productId String
+  response  Json?
+  target    String
   product   Product     @relation(fields: [productId], references: [id])
   user      User        @relation(fields: [userId], references: [id])
   payment   Payment?

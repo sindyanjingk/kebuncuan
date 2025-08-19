@@ -28,18 +28,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Session } from "next-auth"
+import { useParams } from "next/navigation"
 
 export function NavUser({
-  user,
+  session,
 }: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-    tenantName?: string // opsional, bisa ditampilkan
-  }
+  session : Session | null
 }) {
   const { isMobile } = useSidebar()
+  const params = useParams()
+  const storeSlug = params.store as string
 
   return (
     <SidebarMenu>
@@ -51,21 +50,16 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name ?? undefined} />
                 <AvatarFallback className="rounded-lg">
-                  {user.name.slice(0, 2).toUpperCase()}
+                  {(session?.user?.name ? session.user.name.slice(0, 2).toUpperCase() : "")}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{session?.user?.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {session?.user?.email}
                 </span>
-                {user.tenantName && (
-                  <span className="text-muted-foreground truncate text-xs italic">
-                    {user.tenantName}
-                  </span>
-                )}
               </div>
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -79,50 +73,32 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? undefined} />
                   <AvatarFallback className="rounded-lg">
-                    {user.name.slice(0, 2).toUpperCase()}
+                    {(session?.user?.name ? session.user.name.slice(0, 2).toUpperCase() : "")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{session?.user?.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {session?.user?.email}
                   </span>
-                  {user.tenantName && (
-                    <span className="text-muted-foreground truncate text-xs italic">
-                      {user.tenantName}
-                    </span>
-                  )}
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/dashboard/account">
+                <a href={`/${storeSlug}/dashboard/profile`}>
                   <IconUserCircle className="mr-2" />
                   Akun Saya
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href="/dashboard/billing">
-                  <IconCreditCard className="mr-2" />
-                  Tagihan
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href="/dashboard/settings">
-                  <IconSettings className="mr-2" />
-                  Pengaturan
                 </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                // Ganti dengan signOut() atau router.push('/api/auth/signout')
-                console.log("Logging out")
+                import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/" }))
               }}
             >
               <IconLogout className="mr-2" />

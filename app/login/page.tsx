@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email tidak valid" }),
@@ -14,17 +16,38 @@ const loginSchema = z.object({
 })
 
 export default function LoginPage() {
+  const router = useRouter()
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(loginSchema) })
 
+  const [loginError, setLoginError] = useState("")
   const onSubmit = async (data: any) => {
-    await signIn("credentials", {
+    setLoginError("")
+    const result = await signIn("credentials", {
       ...data,
       redirect: false,
     })
+    if (result && result.ok) {
+      // Cek toko user
+      const res = await fetch(`/api/user/stores?email=${encodeURIComponent(data.email)}`)
+      if (res.ok) {
+        const json = await res.json()
+        if (json.stores && json.stores.length > 0) {
+          // Redirect ke dashboard toko pertama
+          router.push(`/${json.stores[0].slug}/dashboard`)
+        } else {
+          // Redirect ke onboarding
+          router.push("/onboarding")
+        }
+      } else {
+        setLoginError("Gagal cek toko user")
+      }
+    } else if (result && result.error) {
+      setLoginError("Login gagal: " + result.error)
+    }
   }
 
   return (
@@ -39,6 +62,7 @@ export default function LoginPage() {
         <h2 className="text-lg font-semibold text-neutral-800 mb-4 text-center">Masuk ke Akun</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {loginError && <p className="text-red-500 text-sm mb-2">{loginError}</p>}
           <div>
             <Input placeholder="Email" {...register("email")} />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
