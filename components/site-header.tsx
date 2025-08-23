@@ -15,10 +15,15 @@ export function SiteHeader() {
         />
 
         <div className="flex items-center gap-2">
-          <h1 className="text-base font-semibold">
-            Dashboard <span className="text-emerald-600">KebunCuan</span>
-          </h1>
-          <Badge className="bg-emerald-100 text-emerald-700 hidden sm:inline" variant="outline">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-xs">K</span>
+            </div>
+            <h1 className="text-base font-semibold">
+              Dashboard <span className="text-blue-600">KebunCuan</span>
+            </h1>
+          </div>
+          <Badge className="bg-blue-100 text-blue-700 hidden sm:inline" variant="outline">
             UMKM
           </Badge>
         </div>

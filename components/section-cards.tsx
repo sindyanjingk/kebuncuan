@@ -32,7 +32,7 @@ export function SectionCards({
           <CardDescription>Total Penjualan</CardDescription>
           <CardTitle className="text-2xl font-semibold">Rp {totalPenjualan.toLocaleString("id-ID")}</CardTitle>
           <CardContent>
-            <Badge variant="outline" className="text-green-600">
+            <Badge variant="outline" className="text-blue-600">
               <IconTrendingUp className="mr-1 size-4" /> +18.2%
             </Badge>
           </CardContent>
@@ -48,7 +48,7 @@ export function SectionCards({
           <CardDescription>Customer Terdaftar</CardDescription>
           <CardTitle className="text-2xl font-semibold">{customers.length}</CardTitle>
           <CardContent>
-            <Badge variant="outline" className="text-green-600">
+            <Badge variant="outline" className="text-blue-600">
               <IconTrendingUp className="mr-1 size-4" /> +6 
             </Badge>
           </CardContent>
@@ -64,7 +64,7 @@ export function SectionCards({
           <CardDescription>Produk Terjual</CardDescription>
           <CardTitle className="text-2xl font-semibold">{produkTerjual}</CardTitle>
           <CardContent>
-            <Badge variant="outline" className="text-green-600">
+            <Badge variant="outline" className="text-blue-600">
               <IconTrendingUp className="mr-1 size-4" /> +9.5%
             </Badge>
           </CardContent>

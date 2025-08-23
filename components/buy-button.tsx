@@ -31,14 +31,13 @@ export function BuyButton({ productId, disabled, session }: { productId: string;
   return (
     <div className="flex flex-col gap-1">
       <Button
-        size="sm"
-        className="bg-green-600 hover:bg-green-700 text-white"
         onClick={handleBuy}
         disabled={loading || disabled}
+        className="bg-blue-600 hover:bg-blue-700 text-white"
       >
         {loading ? "Memproses..." : "Beli"}
       </Button>
-      {success && <span className="text-green-600 text-xs">{success}</span>}
+      {success && <span className="text-blue-600 text-xs">{success}</span>}
       {error && <span className="text-red-500 text-xs">{error}</span>}
     </div>
   );

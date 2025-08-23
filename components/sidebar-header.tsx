@@ -63,7 +63,6 @@ export function SidebarHeader({session} : {session : Session | null}) {
                         <div className="flex items-center gap-2">
                             <IconBuildingStore className="size-4" />
                             {currentStore ? currentStore.name : "Pilih Toko"}
-                            <span className="ml-2 text-xs text-muted-foreground">({stores.length} toko)</span>
                         </div>
                         <IconChevronDown className="size-4 text-muted-foreground" />
                     </Button>
@@ -74,13 +73,13 @@ export function SidebarHeader({session} : {session : Session | null}) {
                     {stores.map((store) => (
                         <DropdownMenuItem
                             key={store.id}
-                            className={`flex items-center justify-between rounded-md transition-colors cursor-pointer px-3 py-2 ${currentStore && store.slug === currentStore.slug ? 'bg-primary/10 font-bold' : 'hover:bg-primary/10'}`}
+                            className={`flex items-center justify-between rounded-md transition-colors cursor-pointer px-3 py-2 ${currentStore && store.slug === currentStore.slug ? 'bg-blue-50 font-bold text-blue-700' : 'hover:bg-blue-50'}`}
                             onClick={() => handleStoreChange(store)}
                         >
                             <div className="flex items-center gap-2">
-                                <IconBuildingStore className="size-4 text-primary" />
+                                <IconBuildingStore className="size-4 text-blue-600" />
                                 <span className="font-medium">{store.name}</span>
-                                {currentStore && store.slug === currentStore.slug && <span className="ml-1 text-xs text-primary">(aktif)</span>}
+                                {/* {currentStore && store.slug === currentStore.slug && <span className="ml-1 text-xs text-blue-600">(aktif)</span>} */}
                             </div>
                             <Button
                                 variant="ghost"
@@ -97,7 +96,7 @@ export function SidebarHeader({session} : {session : Session | null}) {
                     ))}
                     <DropdownMenuSeparator className="my-2" />
                     <DropdownMenuItem
-                        className="text-primary font-semibold rounded-md bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer px-3 py-2"
+                        className="text-blue-600 font-semibold rounded-md bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer px-3 py-2"
                         onClick={handleNewStore}
                     >
                         + Tambah Toko Baru

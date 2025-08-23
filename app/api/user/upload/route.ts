@@ -4,6 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Route segment config for file uploads
+export const maxDuration = 60; // 60 seconds timeout for file uploads
+
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
@@ -63,12 +66,3 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 }
-
-// Limit file size
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "4mb",
-    },
-  },
-};

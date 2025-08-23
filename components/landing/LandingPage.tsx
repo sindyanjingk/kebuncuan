@@ -5,19 +5,21 @@ import { Hero } from "./Hero";
 import { HowItWorks } from "./HowItWorks";
 import { MockupPreview } from "./MockupPreview";
 import { Navbar } from "./Navbar";
-import { Testimonials } from "./Testimonials";
+import { TestimonialsSection } from "./TestimonialsNew";
+import { ServicesSection } from "./Services";
+import { ContactSection } from "./Contact";
+import { PortfolioSection } from "./Portfolio";
 
 export default function LandingPage() {
     return (
-
         <>
             <Navbar />
             <Hero />
-            <MockupPreview />
             <FeaturesGrid />
-            <HowItWorks />
-            <Testimonials />
-            <CTA />
+            <ServicesSection />
+            <PortfolioSection />
+            <TestimonialsSection />
+            <ContactSection />
             <Footer />
         </>
     )

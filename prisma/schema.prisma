@@ -68,17 +68,17 @@ model Product {
   storeId     String
   providerId  String?
   orders      Order[]
-  images      ProductImage[]
   category    Category         @relation(fields: [categoryId], references: [id])
   provider    ServiceProvider? @relation(fields: [providerId], references: [id])
   store       Store            @relation(fields: [storeId], references: [id])
+  images      ProductImage[]
 }
 
 model ProductImage {
   id        String   @id @default(cuid())
   url       String
   productId String
-  order     Int      @default(0) // For ordering the images, primary image is 0
+  order     Int      @default(0)
   createdAt DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 

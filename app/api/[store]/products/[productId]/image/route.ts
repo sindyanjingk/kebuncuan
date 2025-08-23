@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { put } from "@vercel/blob"
 import { getAuthUser } from "@/lib/auth-helpers"
 
+// Route segment config for file uploads
+export const maxDuration = 60 // 60 seconds timeout for file uploads
+
 export async function POST(
   request: Request,
   { params }: { params: { store: string, productId: string } }
@@ -99,13 +102,4 @@ export async function POST(
       { status: 500 }
     )
   }
-}
-
-// Limit file size
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "4mb",
-    },
-  },
 }

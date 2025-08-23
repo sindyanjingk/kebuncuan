@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const body = await req.json();
-    const { name, description, price, categoryId, type, storeId, images } = body;
+    const { name, description, price, categoryId, storeId, images } = body;
     
     // Find store by slug
     const store = await prisma.store.findUnique({ 
@@ -60,7 +60,6 @@ export async function POST(req: Request) {
         description,
         price: Number(price),
         categoryId,
-        type,
         storeId: store.id,
         active: true,
         images: {
@@ -95,7 +94,7 @@ export async function PUT(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const body = await req.json();
-    const { id, name, description, price, categoryId, type, storeId, images } = body;
+    const { id, name, description, price, categoryId, storeId, images } = body;
 
     // Delete existing images first
     await prisma.productImage.deleteMany({
@@ -110,7 +109,6 @@ export async function PUT(req: Request) {
         description,
         price: Number(price),
         categoryId,
-        type,
         images: {
           createMany: {
             data: images.map((img: any, idx: number) => ({
