@@ -8,7 +8,8 @@ import { NavbarAuth } from "@/components/navbar-auth"
 import { TenantHead } from "@/components/tenant-head"
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { BuyButton } from '@/components/buy-button'
+import { ProductCard } from '@/components/product-card'
+import { PurchaseWrapper } from '@/components/purchase-wrapper'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -53,7 +54,7 @@ export default async function Page({ params }: { params: { store: string } }) {
   // Default store view (if no template)
   if (!store.template) {
     return (
-      <main className="flex flex-col items-center min-h-screen py-10 px-4 bg-gradient-to-br from-green-50 to-white">
+      <main className="flex flex-col items-center min-h-screen pt-20 py-10 px-4 bg-gradient-to-br from-green-50 to-white">
         <TenantHead store={store} />
         
         <div className="w-full max-w-3xl flex flex-col items-center mb-10">
@@ -74,11 +75,11 @@ export default async function Page({ params }: { params: { store: string } }) {
           {session ?
             <StoreAuthStatus session={session} storeSlug={store.slug} /> :
             <div className="flex gap-4 mt-2">
-              <Link href="/login">
-                <Button variant="outline">Login</Button>
+              <Link href={`/login`}>
+                <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">Login</Button>
               </Link>
-              <Link href="/register">
-                <Button variant="default">Register</Button>
+              <Link href={`/register`}>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">Register</Button>
               </Link>
             </div>
           }
@@ -88,26 +89,18 @@ export default async function Page({ params }: { params: { store: string } }) {
             <div className="col-span-full text-center text-muted-foreground">Belum ada produk</div>
           ) : (
             store.products.map((product) => (
-              <div key={product.id} className="flex flex-col">
-                <div className="rounded-2xl border bg-white/80 shadow-lg hover:shadow-2xl transition p-6 flex flex-col h-full group">
-                  <div className="font-bold text-lg mb-1 group-hover:text-green-700 transition">{product.name}</div>
-                  <div className="text-xs text-muted-foreground mb-2">{product.category?.name || '-'}</div>
-                  <div className="font-extrabold text-green-700 text-xl mb-2">Rp {product.price.toLocaleString('id-ID')}</div>
-                  <div className="flex-1 text-sm mb-3 text-gray-700">{product.description}</div>
-                  <div className="mt-auto flex gap-2 items-center">
-                    <span className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>{product.active ? 'Aktif' : 'Nonaktif'}</span>
-                    <BuyButton 
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                      }} 
-                      disabled={!product.active} 
-                      session={session} 
-                    />
-                  </div>
-                </div>
-              </div>
+              <ProductCard 
+                key={product.id}
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  description: product.description,
+                  active: product.active,
+                  category: product.category
+                }}
+                session={session}
+              />
             ))
           )}
         </div>
@@ -190,58 +183,7 @@ export default async function Page({ params }: { params: { store: string } }) {
           }}
         >
           {/* Floating Header with same gradient */}
-          <header 
-            className="absolute top-0 left-0 right-0 z-50 backdrop-blur-sm border-b border-white/10"
-            style={{ 
-              background: `linear-gradient(90deg, ${settings.hero.backgroundColor}E6, ${settings.colorScheme.secondary}E6, ${settings.colorScheme.primary}E6)`
-            }}
-          >
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {store.logoUrl ? (
-                    <div className="relative w-10 h-10">
-                      <Image
-                        src={store.logoUrl}
-                        alt={`${store.name} logo`}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div 
-                      className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold"
-                      style={{ color: settings.hero.textColor }}
-                    >
-                      {store.name.charAt(0)}
-                    </div>
-                  )}
-                  <span 
-                    className="font-bold text-lg"
-                    style={{ color: settings.hero.textColor }}
-                  >
-                    {store.name}
-                  </span>
-                </div>
-                
-                <nav className="hidden md:flex items-center gap-6">
-                  {settings.products.enabled && (
-                    <a href="#products" className="text-white/80 hover:text-white transition-colors font-medium">Produk</a>
-                  )}
-                  {settings.features.enabled && (
-                    <a href="#features" className="text-white/80 hover:text-white transition-colors font-medium">Fitur</a>
-                  )}
-                  {settings.testimonials.enabled && (
-                    <a href="#testimonials" className="text-white/80 hover:text-white transition-colors font-medium">Testimoni</a>
-                  )}
-                  <a href="#contact" className="text-white/80 hover:text-white transition-colors font-medium">Kontak</a>
-                </nav>
-                
-                
-                <NavbarAuth session={session} storeSlug={store.slug} />
-              </div>
-            </div>
-          </header>
+
 
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
@@ -249,7 +191,7 @@ export default async function Page({ params }: { params: { store: string } }) {
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
           </div>
           
-          <div className="relative container mx-auto px-4 py-20 lg:py-32 pt-32">
+          <div className="relative container mx-auto px-4 py-20 lg:py-32 pt-24">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left Content */}
               <div className="text-left">
@@ -545,99 +487,103 @@ export default async function Page({ params }: { params: { store: string } }) {
               </div>
             ) : (
               store.products.map((product, index) => (
-                <Card key={product.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white">
-                  <div className="relative">
-                    <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden">
-                      {product.images && product.images.length > 0 ? (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                <Link key={product.id} href={`/products/${product.id}`}>
+                  <Card className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white cursor-pointer">
+                    <div className="relative">
+                      <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden">
+                        {product.images && product.images.length > 0 ? (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        ) : (
+                          <div className="h-full flex items-center justify-center">
+                            <span className="text-4xl">{index % 2 === 0 ? '🎁' : '⭐'}</span>
+                          </div>
+                        )}
+                        
+                        {/* Overlay gradient for better text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        
+                        <div className="absolute top-3 left-3">
+                          <Badge variant={product.active ? "default" : "secondary"} className="shadow-sm backdrop-blur-sm">
+                            {product.active ? '✅ Ready' : '⏳ Soon'}
+                          </Badge>
+                        </div>
+                        {index === 0 && (
+                          <div className="absolute top-3 right-3">
+                            <Badge className="bg-red-500 text-white animate-pulse shadow-sm backdrop-blur-sm">🔥 Best Seller</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+                          {product.name}
+                        </CardTitle>
+                      </div>
+                      <CardDescription className="text-sm text-blue-600 font-medium">
+                        {product.category?.name || 'Kategori Premium'}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
+                      
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">
+                            Rp {product.price.toLocaleString('id-ID')}
+                          </div>
+                          <div className="text-xs text-gray-500">💎 Harga Terbaik</div>
+                        </div>
+                        <PurchaseWrapper
+                          product={{
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                          }} 
+                          disabled={!product.active} 
+                          session={session} 
                         />
-                      ) : (
-                        <div className="h-full flex items-center justify-center">
-                          <span className="text-4xl">{index % 2 === 0 ? '🎁' : '⭐'}</span>
-                        </div>
-                      )}
-                      
-                      {/* Overlay gradient for better text readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      
-                      <div className="absolute top-3 left-3">
-                        <Badge variant={product.active ? "default" : "secondary"} className="shadow-sm backdrop-blur-sm">
-                          {product.active ? '✅ Ready' : '⏳ Soon'}
-                        </Badge>
                       </div>
-                      {index === 0 && (
-                        <div className="absolute top-3 right-3">
-                          <Badge className="bg-red-500 text-white animate-pulse shadow-sm backdrop-blur-sm">🔥 Best Seller</Badge>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
-                        {product.name}
-                      </CardTitle>
-                    </div>
-                    <CardDescription className="text-sm text-blue-600 font-medium">
-                      {product.category?.name || 'Kategori Premium'}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                      {product.description}
-                    </p>
-                    
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-2xl font-bold text-green-600">
-                          Rp {product.price.toLocaleString('id-ID')}
-                        </div>
-                        <div className="text-xs text-gray-500">💎 Harga Terbaik</div>
+                      
+                      <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t">
+                        <span className="flex items-center gap-1">
+                          <span>⭐</span> 4.8 (234 review)
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span>🚚</span> Free shipping
+                        </span>
                       </div>
-                      <BuyButton 
-                        product={{
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                        }} 
-                        disabled={!product.active} 
-                        session={session} 
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t">
-                      <span className="flex items-center gap-1">
-                        <span>⭐</span> 4.8 (234 review)
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span>🚚</span> Free shipping
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))
             )}
           </div>
           
           {store.products.length > 0 && (
             <div className="text-center mt-12">
-              <Button 
-                size="lg" 
-                className="px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                style={{ 
-                  backgroundColor: settings.colorScheme.primary,
-                  color: settings.colorScheme.background 
-                }}
-              >
-                🛍️ Lihat Semua Produk
-              </Button>
+              <Link href={`/products`}>
+                <Button 
+                  size="lg" 
+                  className="px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  style={{ 
+                    backgroundColor: settings.colorScheme.primary,
+                    color: settings.colorScheme.background 
+                  }}
+                >
+                  🛍️ Lihat Semua Produk
+                </Button>
+              </Link>
             </div>
           )}
         </div>
@@ -928,118 +874,6 @@ export default async function Page({ params }: { params: { store: string } }) {
           </div>
         </div>
       </section>
-
-      {/* Footer - Comprehensive dengan gradient konsisten */}
-      <footer id="contact" className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 text-white">
-        {/* Main Footer */}
-        <div className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Company Info */}
-              <div className="lg:col-span-2">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {store.name.charAt(0)}
-                  </div>
-                  <h3 className="text-2xl font-bold">{store.name}</h3>
-                </div>
-                <p className="text-blue-100 mb-8 leading-relaxed max-w-md">
-                  Platform marketplace terpercaya yang menghadirkan pengalaman berbelanja online 
-                  terbaik dengan jaminan keamanan dan kualitas produk terjamin.
-                </p>
-                
-                {/* Social Media */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-lg">Ikuti Kami:</h4>
-                  <div className="flex space-x-4">
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                      📘
-                    </Button>
-                    <Button size="sm" className="bg-pink-600 hover:bg-pink-700 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                      📷
-                    </Button>
-                    <Button size="sm" className="bg-blue-400 hover:bg-blue-500 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                      🐦
-                    </Button>
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                      📺
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Quick Links */}
-              <div>
-                <h4 className="font-bold text-lg mb-6 text-white">Tautan Cepat</h4>
-                <ul className="space-y-3 text-blue-100">
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Tentang Kami</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Cara Berbelanja</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Cara Menjual</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">FAQ</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Blog</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Karir</a></li>
-                </ul>
-              </div>
-              
-              {/* Customer Service */}
-              <div>
-                <h4 className="font-bold text-lg mb-6 text-white">Layanan Pelanggan</h4>
-                <ul className="space-y-3 text-blue-100">
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Pusat Bantuan</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Hubungi Kami</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Metode Pembayaran</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Kebijakan Pengembalian</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Garansi & Klaim</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors duration-300 hover:translate-x-1 transform block">Lacak Pesanan</a></li>
-                </ul>
-              </div>
-            </div>
-            
-            {/* Trust Badges */}
-            <div className="mt-16 pt-8 border-t border-white/20">
-              <div className="text-center">
-                <h4 className="font-bold text-xl mb-8 text-white">🏆 Dipercaya & Bersertifikat</h4>
-                <div className="flex flex-wrap justify-center gap-6 text-sm">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300">
-                    <span>🛡️</span> SSL Secured
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300">
-                    <span>🏅</span> ISO 27001
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300">
-                    <span>✅</span> Verified Partner
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-300">
-                    <span>💳</span> PCI DSS
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Bottom Footer dengan gradient yang sama */}
-        <div className="bg-gradient-to-r from-black/50 via-blue-950/50 to-purple-950/50 backdrop-blur-sm py-8 border-t border-white/10">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-blue-100 text-sm text-center md:text-left">
-                © 2025 {store.name}. All rights reserved. Made with ❤️ in Indonesia
-              </div>
-              <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm">
-                <a href="#" className="text-blue-100 hover:text-white transition-colors duration-300">
-                  Syarat & Ketentuan
-                </a>
-                <a href="#" className="text-blue-100 hover:text-white transition-colors duration-300">
-                  Kebijakan Privasi
-                </a>
-                <a href="#" className="text-blue-100 hover:text-white transition-colors duration-300">
-                  Sitemap
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }

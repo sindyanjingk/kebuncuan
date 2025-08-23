@@ -30,6 +30,7 @@ model Store {
   faviconUrl String?
   customers  Customer[]
   products   Product[]
+  carts      Cart[]
   owner      User          @relation(fields: [ownerId], references: [id])
   template   Template?     @relation(fields: [templateId], references: [id])
   settings   StoreSetting?
@@ -47,6 +48,7 @@ model User {
   customers    Customer[]
   orders       Order[]
   stores       Store[]
+  carts        Cart[]
 }
 
 model Category {
@@ -73,6 +75,7 @@ model Product {
   storeId     String
   providerId  String?
   orders      Order[]
+  cartItems   CartItem[]
   category    Category         @relation(fields: [categoryId], references: [id])
   provider    ServiceProvider? @relation(fields: [providerId], references: [id])
   store       Store            @relation(fields: [storeId], references: [id])
@@ -232,6 +235,36 @@ model StoreSetting {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String
+  storeId   String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store     Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@unique([userId, storeId])
+  @@index([userId])
+  @@index([storeId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
 }
 
 enum ProductType {

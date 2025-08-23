@@ -25,7 +25,7 @@ export function NavbarAuth({ session, storeSlug }: NavbarAuthProps) {
       {session ? (
         <div className="flex items-center gap-3">
           {/* Cart Button */}
-          <Link href={`/domain/${storeSlug}/cart`} className="relative">
+          <Link href={`/cart`} className="relative">
             <Button variant="ghost" size="sm" className="text-white hover:text-purple-200">
               <ShoppingCart className="h-5 w-5" />
               {getTotalItems() > 0 && (
@@ -53,12 +53,23 @@ export function NavbarAuth({ session, storeSlug }: NavbarAuthProps) {
           </Button>
         </div>
       ) : (
-        <div className="flex gap-2">
-          <Link href="/login">
-            <Button variant="outline" size="sm" className="text-xs">Login</Button>
+        <div className="flex gap-3">
+          <Link href={`/login`}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-white/90 hover:text-white hover:bg-white/10 border border-white/20 px-4 py-2 rounded-full font-medium transition-all duration-200"
+            >
+              Login
+            </Button>
           </Link>
-          <Link href="/register">
-            <Button variant="default" size="sm" className="text-xs">Register</Button>
+          <Link href={`/register`}>
+            <Button 
+              size="sm" 
+              className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/30 px-4 py-2 rounded-full font-medium transition-all duration-200 shadow-lg"
+            >
+              Register
+            </Button>
           </Link>
         </div>
       )}

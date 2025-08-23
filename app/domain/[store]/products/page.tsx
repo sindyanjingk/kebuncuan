@@ -1,11 +1,10 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { formatRupiah } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { ProductsClient } from "./products-client";
 
 interface Product {
   id: string;
@@ -13,53 +12,90 @@ interface Product {
   description: string;
   price: number;
   images: { url: string }[];
+  category: { name: string } | null;
+  active: boolean;
 }
 
-export default function ProductsPage() {
-  const params = useParams();
-  const storeSlug = params.store as string;
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface Store {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string | null;
+}
 
-  useEffect(() => {
-    fetch(`/api/products?store=${storeSlug}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data.products);
-        setLoading(false);
-      });
-  }, [storeSlug]);
+export default async function ProductsPage({ params }: { params: { store: string } }) {
+  const store = await prisma.store.findUnique({
+    where: { slug: params.store },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      logoUrl: true,
+    }
+  });
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (!store) {
+    notFound();
   }
 
+  const products = await prisma.product.findMany({
+    where: {
+      store: { slug: params.store },
+      active: true,
+    },
+    include: {
+      category: {
+        select: { name: true }
+      },
+      images: {
+        orderBy: { order: 'asc' }
+      }
+    },
+    orderBy: { name: 'asc' }
+  });
+
+  const categories = Array.from(new Set(
+    products
+      .map(p => p.category?.name)
+      .filter(Boolean)
+  )) as string[];
+
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold mb-6">Produk Kami</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <Link href={`/domain/${storeSlug}/products/${product.id}`} key={product.id}>
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-0">
-                <div className="aspect-square relative">
-                  <Image
-                    src={product.images[0]?.url || "/images/product-placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="p-4">
-                <div>
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{formatRupiah(product.price)}</p>
-                </div>
-              </CardFooter>
-            </Card>
-          </Link>
-        ))}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
+      <div className="container mx-auto px-4 py-8 pt-24">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-6">
+            <Link href={`/`}>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Kembali
+              </Button>
+            </Link>
+            
+            {store.logoUrl && (
+              <div className="relative w-12 h-12">
+                <Image
+                  src={store.logoUrl}
+                  alt={`${store.name} logo`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Produk {store.name}</h1>
+              <p className="text-gray-600">Temukan produk terbaik untuk Anda</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Client-side filtering and interactions */}
+        <ProductsClient 
+          initialProducts={products}
+          categories={categories}
+          storeSlug={params.store}
+        />
       </div>
     </div>
   );

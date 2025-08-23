@@ -22,18 +22,12 @@ export function BuyButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
 
   const handleAddToCart = async () => {
     setLoading(true);
     try {
-      addItem({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        emoji: product.emoji,
-      });
+      await addToCart(product.id, 1);
       
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);

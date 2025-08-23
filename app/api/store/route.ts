@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const slug = searchParams.get('slug');
+        const includeSettings = searchParams.get('includeSettings') === 'true';
 
         if (!slug) {
             return NextResponse.json({ error: "Slug is required" }, { status: 400 });
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
                 slug: true,
                 logoUrl: true,
                 faviconUrl: true,
-                ownerId: true
+                ownerId: true,
+                settings: includeSettings
             }
         });
 

@@ -28,7 +28,7 @@ export function StoreAuthStatus({ session, storeSlug }: { session: Session | nul
                 </div>
                 
                 {/* Cart Button */}
-                <Link href={`/domain/${storeSlug}/cart`}>
+                <Link href={`/cart`}>
                     <Button
                         size="sm"
                         variant="outline"
