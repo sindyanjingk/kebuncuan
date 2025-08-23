@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-
+import { CartProvider } from "@/hooks/use-cart";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function StoreLayout({
@@ -60,11 +60,13 @@ export default function StoreLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
-        {children}
-      </main>
-      <Toaster />
-    </div>
+    <CartProvider>
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1">
+          {children}
+        </main>
+        <Toaster />
+      </div>
+    </CartProvider>
   );
 }

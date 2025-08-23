@@ -1,9 +1,11 @@
 import React from 'react'
+import Image from 'next/image'
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { LoginModal } from "@/components/auth-modals"
-import { StoreRegisterModal } from "@/components/store-register-modal"
+import Link from "next/link"
 import { StoreAuthStatus } from "@/components/store-auth-status"
+import { NavbarAuth } from "@/components/navbar-auth"
+import { TenantHead } from "@/components/tenant-head"
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { BuyButton } from '@/components/buy-button'
@@ -15,7 +17,14 @@ export default async function Page({ params }: { params: { store: string } }) {
   const store = await prisma.store.findUnique({
     where: { slug: params.store },
     include: { 
-      products: { include: { category: true } },
+      products: { 
+        include: { 
+          category: true,
+          images: {
+            orderBy: { order: 'asc' }
+          }
+        } 
+      },
       settings: true,
       template: {
         include: {
@@ -45,14 +54,32 @@ export default async function Page({ params }: { params: { store: string } }) {
   if (!store.template) {
     return (
       <main className="flex flex-col items-center min-h-screen py-10 px-4 bg-gradient-to-br from-green-50 to-white">
+        <TenantHead store={store} />
+        
         <div className="w-full max-w-3xl flex flex-col items-center mb-10">
-          <h1 className="text-4xl font-extrabold text-green-700 mb-2 drop-shadow">{store.name}</h1>
+          <div className="flex items-center gap-4 mb-2">
+            {store.logoUrl && (
+              <div className="relative w-16 h-16">
+                <Image
+                  src={store.logoUrl}
+                  alt={`${store.name} logo`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+            <h1 className="text-4xl font-extrabold text-green-700 drop-shadow">{store.name}</h1>
+          </div>
           <p className="text-muted-foreground mb-4">Toko: {store.slug}</p>
           {session ?
-            <StoreAuthStatus session={session} /> :
+            <StoreAuthStatus session={session} storeSlug={store.slug} /> :
             <div className="flex gap-4 mt-2">
-              <LoginModal />
-              <StoreRegisterModal />
+              <Link href="/login">
+                <Button variant="outline">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="default">Register</Button>
+              </Link>
             </div>
           }
         </div>
@@ -69,7 +96,15 @@ export default async function Page({ params }: { params: { store: string } }) {
                   <div className="flex-1 text-sm mb-3 text-gray-700">{product.description}</div>
                   <div className="mt-auto flex gap-2 items-center">
                     <span className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>{product.active ? 'Aktif' : 'Nonaktif'}</span>
-                    <BuyButton productId={product.id} disabled={!product.active} session={session} />
+                    <BuyButton 
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                      }} 
+                      disabled={!product.active} 
+                      session={session} 
+                    />
                   </div>
                 </div>
               </div>
@@ -144,6 +179,8 @@ export default async function Page({ params }: { params: { store: string } }) {
         color: settings.colorScheme.text 
       }}
     >
+      <TenantHead store={store} />
+      
       {/* Hero Section - Bagian Atas */}
       {settings.hero.enabled && (
         <section 
@@ -162,12 +199,23 @@ export default async function Page({ params }: { params: { store: string } }) {
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold"
-                    style={{ color: settings.hero.textColor }}
-                  >
-                    {store.name.charAt(0)}
-                  </div>
+                  {store.logoUrl ? (
+                    <div className="relative w-10 h-10">
+                      <Image
+                        src={store.logoUrl}
+                        alt={`${store.name} logo`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold"
+                      style={{ color: settings.hero.textColor }}
+                    >
+                      {store.name.charAt(0)}
+                    </div>
+                  )}
                   <span 
                     className="font-bold text-lg"
                     style={{ color: settings.hero.textColor }}
@@ -189,16 +237,8 @@ export default async function Page({ params }: { params: { store: string } }) {
                   <a href="#contact" className="text-white/80 hover:text-white transition-colors font-medium">Kontak</a>
                 </nav>
                 
-                <div className="flex items-center gap-3">
-                  {session ? (
-                    <span className="text-white/80 text-sm">👋 {session.user?.email}</span>
-                  ) : (
-                    <div className="flex gap-2">
-                      <LoginModal />
-                      <StoreRegisterModal />
-                    </div>
-                  )}
-                </div>
+                
+                <NavbarAuth session={session} storeSlug={store.slug} />
               </div>
             </div>
           </header>
@@ -507,16 +547,32 @@ export default async function Page({ params }: { params: { store: string } }) {
               store.products.map((product, index) => (
                 <Card key={product.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white">
                   <div className="relative">
-                    <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative overflow-hidden">
-                      <span className="text-4xl">{index % 2 === 0 ? '🎁' : '⭐'}</span>
+                    <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden">
+                      {product.images && product.images.length > 0 ? (
+                        <Image
+                          src={product.images[0].url}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="h-full flex items-center justify-center">
+                          <span className="text-4xl">{index % 2 === 0 ? '🎁' : '⭐'}</span>
+                        </div>
+                      )}
+                      
+                      {/* Overlay gradient for better text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                      
                       <div className="absolute top-3 left-3">
-                        <Badge variant={product.active ? "default" : "secondary"} className="shadow-sm">
+                        <Badge variant={product.active ? "default" : "secondary"} className="shadow-sm backdrop-blur-sm">
                           {product.active ? '✅ Ready' : '⏳ Soon'}
                         </Badge>
                       </div>
                       {index === 0 && (
                         <div className="absolute top-3 right-3">
-                          <Badge className="bg-red-500 text-white animate-pulse">🔥 Best Seller</Badge>
+                          <Badge className="bg-red-500 text-white animate-pulse shadow-sm backdrop-blur-sm">🔥 Best Seller</Badge>
                         </div>
                       )}
                     </div>
@@ -545,7 +601,15 @@ export default async function Page({ params }: { params: { store: string } }) {
                         </div>
                         <div className="text-xs text-gray-500">💎 Harga Terbaik</div>
                       </div>
-                      <BuyButton productId={product.id} disabled={!product.active} session={session} />
+                      <BuyButton 
+                        product={{
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                        }} 
+                        disabled={!product.active} 
+                        session={session} 
+                      />
                     </div>
                     
                     <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t">
@@ -740,7 +804,7 @@ export default async function Page({ params }: { params: { store: string } }) {
       )}
 
       {/* App Download Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      {/* <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -814,7 +878,7 @@ export default async function Page({ params }: { params: { store: string } }) {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Newsletter Signup - Lead Capture */}
       <section className="py-20 bg-gradient-to-br from-yellow-50 to-orange-50">

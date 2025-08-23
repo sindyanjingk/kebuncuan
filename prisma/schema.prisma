@@ -26,6 +26,8 @@ model Store {
   ownerId    String
   createdAt  DateTime      @default(now())
   templateId String?
+  logoUrl    String?
+  faviconUrl String?
   customers  Customer[]
   products   Product[]
   owner      User          @relation(fields: [ownerId], references: [id])

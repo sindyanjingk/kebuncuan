@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -194,13 +195,12 @@ export default function SelectTemplatePage() {
             >
               <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
-                  <img
-                    src={template.thumbnailImage}
+                  <Image
+                    src={template.thumbnailImage || '/images/template-placeholder.jpg'}
                     alt={template.name}
+                    width={400}
+                    height={192}
                     className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/template-placeholder.jpg'
-                    }}
                   />
                   <div className="absolute top-3 left-3 flex gap-2">
                     <Badge variant="secondary" className="bg-white/90 text-gray-700">

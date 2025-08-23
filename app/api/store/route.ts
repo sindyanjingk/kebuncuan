@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
                 id: true,
                 name: true,
                 slug: true,
+                logoUrl: true,
+                faviconUrl: true,
                 ownerId: true
             }
         });

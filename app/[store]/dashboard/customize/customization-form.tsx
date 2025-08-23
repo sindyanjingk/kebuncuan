@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
+import { ImageUploader } from "@/components/ui/image-uploader"
 
 type Store = {
   id: string
@@ -26,6 +27,13 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState({
+    // Brand Settings
+    brand: {
+      logoUrl: "",
+      faviconUrl: "",
+      storeName: store.name
+    },
+    
     // Hero Section Settings
     hero: {
       enabled: true,
@@ -89,13 +97,31 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
   // Load existing customization settings
   const loadExistingSettings = async () => {
     try {
-      const response = await fetch(`/api/store/${store.slug}/customize`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.customization) {
+      // Load customization settings
+      const customizeResponse = await fetch(`/api/store/${store.slug}/customize`)
+      if (customizeResponse.ok) {
+        const customizeData = await customizeResponse.json()
+        if (customizeData.customization) {
           setSettings(prev => ({
             ...prev,
-            ...data.customization
+            ...customizeData.customization
+          }))
+        }
+      }
+
+      // Load store brand data
+      const storeResponse = await fetch(`/api/store`)
+      if (storeResponse.ok) {
+        const storeData = await storeResponse.json()
+        const currentStore = storeData.stores?.find((s: any) => s.slug === store.slug)
+        if (currentStore) {
+          setSettings(prev => ({
+            ...prev,
+            brand: {
+              logoUrl: currentStore.logoUrl || "",
+              faviconUrl: currentStore.faviconUrl || "",
+              storeName: currentStore.name || store.name
+            }
           }))
         }
       }
@@ -125,7 +151,8 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
   const handleSave = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/store/${store.slug}/customize`, {
+      // Save customization settings
+      const customizeResponse = await fetch(`/api/store/${store.slug}/customize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +160,16 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
         body: JSON.stringify(settings),
       })
 
-      if (response.ok) {
+      // Save brand settings separately
+      const brandResponse = await fetch(`/api/store/${store.slug}/branding`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings.brand),
+      })
+
+      if (customizeResponse.ok && brandResponse.ok) {
         alert('Pengaturan berhasil disimpan!')
       } else {
         throw new Error('Gagal menyimpan pengaturan')
@@ -168,8 +204,9 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="hero" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+      <Tabs defaultValue="brand" className="w-full">
+        <TabsList className="grid w-full grid-cols-8">
+          <TabsTrigger value="brand">Brand</TabsTrigger>
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="products">Produk</TabsTrigger>
           <TabsTrigger value="features">Fitur</TabsTrigger>
@@ -178,6 +215,56 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
           <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
           <TabsTrigger value="colors">Warna</TabsTrigger>
         </TabsList>
+
+        {/* Brand Section Tab */}
+        <TabsContent value="brand" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>🎨 Brand Identity</CardTitle>
+              <CardDescription>Upload logo dan favicon untuk identitas toko Anda</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ImageUploader
+                  label="Logo Toko"
+                  currentImage={settings.brand.logoUrl}
+                  onImageChange={(url) => 
+                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, logoUrl: url } }))
+                  }
+                  accept="image/*"
+                  maxSize={5}
+                  recommended="Rekomendasi: 200x60px, format PNG/SVG dengan background transparan"
+                />
+                
+                <ImageUploader
+                  label="Favicon"
+                  currentImage={settings.brand.faviconUrl}
+                  onImageChange={(url) => 
+                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, faviconUrl: url } }))
+                  }
+                  accept="image/*"
+                  maxSize={1}
+                  recommended="Rekomendasi: 32x32px atau 16x16px, format ICO/PNG"
+                />
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <Label htmlFor="store-name">Nama Toko</Label>
+                <Input
+                  id="store-name"
+                  value={settings.brand.storeName}
+                  onChange={(e) => 
+                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, storeName: e.target.value } }))
+                  }
+                  placeholder="Nama toko Anda"
+                />
+                <p className="text-xs text-gray-500">Nama ini akan ditampilkan di title browser dan berbagai tempat lainnya</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Hero Section Tab */}
         <TabsContent value="hero" className="space-y-6">

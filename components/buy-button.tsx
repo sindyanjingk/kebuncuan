@@ -1,26 +1,44 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useCart } from "@/hooks/use-cart";
+import { ShoppingCart, Check } from "lucide-react";
 
-export function BuyButton({ productId, disabled, session }: { productId: string; disabled?: boolean; session?: any }) {
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  emoji?: string;
+}
+
+export function BuyButton({ 
+  product, 
+  disabled, 
+  session 
+}: { 
+  product: Product; 
+  disabled?: boolean; 
+  session?: any;
+}) {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [added, setAdded] = useState(false);
+  const { addItem } = useCart();
 
-  const handleBuy = async () => {
+  const handleAddToCart = async () => {
     setLoading(true);
-    setSuccess("");
-    setError("");
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        emoji: product.emoji,
       });
-      if (!res.ok) throw new Error("Gagal membuat pesanan");
-      setSuccess("Pesanan berhasil dibuat!");
+      
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
     } catch (e: any) {
-      setError(e.message || "Gagal membuat pesanan");
+      console.error("Failed to add to cart:", e);
     } finally {
       setLoading(false);
     }
@@ -29,16 +47,28 @@ export function BuyButton({ productId, disabled, session }: { productId: string;
   if (!session?.user) return null;
 
   return (
-    <div className="flex flex-col gap-1">
-      <Button
-        onClick={handleBuy}
-        disabled={loading || disabled}
-        className="bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        {loading ? "Memproses..." : "Beli"}
-      </Button>
-      {success && <span className="text-blue-600 text-xs">{success}</span>}
-      {error && <span className="text-red-500 text-xs">{error}</span>}
-    </div>
+    <Button
+      onClick={handleAddToCart}
+      disabled={loading || disabled || added}
+      className={`transition-all duration-200 ${
+        added 
+          ? "bg-green-600 hover:bg-green-700" 
+          : "bg-purple-600 hover:bg-purple-700"
+      }`}
+    >
+      {loading ? (
+        "Adding..."
+      ) : added ? (
+        <>
+          <Check className="w-4 h-4 mr-2" />
+          Added!
+        </>
+      ) : (
+        <>
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Add to Cart
+        </>
+      )}
+    </Button>
   );
 }

@@ -7,9 +7,16 @@ export function middleware(request: NextRequest) {
   const match = host.match(/^([^.]+)\.(localhost|lvh\.me)(:\d+)?$/)
   const subdomain = match ? match[1] : null
   const url = request.nextUrl
+  
   if (subdomain && subdomain !== "www") {
-    // Rewrite ke /domain/[store]/home (atau /domain/[store] jika ingin root)
-    url.pathname = `/domain/${subdomain}/home${url.pathname === "/" ? "" : url.pathname}`
+    // Rewrite berdasarkan path
+    if (url.pathname === "/" || url.pathname === "/home") {
+      // Root atau /home diarahkan ke /domain/[store]/home
+      url.pathname = `/domain/${subdomain}/home`
+    } else {
+      // Path lain diarahkan ke /domain/[store][pathname]
+      url.pathname = `/domain/${subdomain}${url.pathname}`
+    }
     return NextResponse.rewrite(url)
   }
   return NextResponse.next()
