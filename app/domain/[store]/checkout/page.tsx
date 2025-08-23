@@ -33,7 +33,7 @@ interface PaymentMethod {
 
 export default function CheckoutPage() {
   const params = useParams();
-  const storeSlug = params.slug as string;
+  const storeSlug = params.store as string;
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);

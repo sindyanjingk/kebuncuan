@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
-        const { name, slug } = await req.json()
+        const { name, slug, templateId } = await req.json()
         if (!name || !slug) {
             return NextResponse.json({ error: "Nama dan slug wajib diisi" }, { status: 400 })
         }
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
                 name,
                 slug,
                 ownerId: user.id,
+                templateId: templateId || null
             },
         })
         return NextResponse.json({ message: "Toko berhasil dibuat", slug: store.slug })

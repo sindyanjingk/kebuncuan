@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
 import { Toaster } from "@/components/ui/sonner";
-import { StoreHeader } from "@/components/store/store-header";
-import { StoreFooter } from "@/components/store/store-footer";
 
 export default function StoreLayout({
   children,
@@ -13,8 +11,8 @@ export default function StoreLayout({
   children: React.ReactNode;
 }) {
   const params = useParams();
-  const slug = params.slug as string;
-  const [store, setStore] = useState<any>(null);
+  const store = params.store as string;
+  const [storeData, setStoreData] = useState<any>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,18 +21,15 @@ export default function StoreLayout({
   useEffect(() => {
     setIsLoading(true);
     setError(null);
-    fetch(`/api/store?slug=${slug}`)
+    fetch(`/api/store?slug=${store}`)
       .then((res) => {
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error('Failed to fetch store');
         }
         return res.json();
       })
       .then((data) => {
-        if (!data || !data.store) {
-          throw new Error('Store data not found');
-        }
-        setStore(data.store);
+        setStoreData(data.store);
       })
       .catch((error) => {
         console.error('Error fetching store:', error);
@@ -43,7 +38,7 @@ export default function StoreLayout({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [slug]);
+  }, [store]);
 
   if (isLoading) {
     return (
@@ -53,7 +48,7 @@ export default function StoreLayout({
     );
   }
 
-  if (error || !store) {
+  if (error || !storeData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -66,11 +61,9 @@ export default function StoreLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <StoreHeader store={store} />
       <main className="flex-1">
         {children}
       </main>
-      <StoreFooter store={store} />
       <Toaster />
     </div>
   );

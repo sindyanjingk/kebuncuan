@@ -13,7 +13,7 @@ export function StoreRegisterModal() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const params = useParams();
-  const slug = params.slug as string;
+  const store = params.store as string;
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +24,7 @@ export function StoreRegisterModal() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username: name, slug }),
+        body: JSON.stringify({ email, password, username: name, slug: store }),
       });
       if (!res.ok) throw new Error("Register gagal");
       setSuccess("Berhasil daftar! Silakan login.");

@@ -8,6 +8,7 @@ import {
   IconUsers,
   IconFileInvoice,
   IconReportAnalytics,
+  IconPalette,
 } from "@tabler/icons-react"
 
 import { useParams, usePathname } from "next/navigation"
@@ -53,6 +54,11 @@ export function NavMain() {
       title: "Laporan",
       url: `/${storeSlug}/dashboard/reports`,
       icon: IconReportAnalytics,
+    },
+    {
+      title: "Customize",
+      url: `/${storeSlug}/dashboard/customize`,
+      icon: IconPalette,
     },
   ];
 

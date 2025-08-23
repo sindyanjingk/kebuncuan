@@ -17,7 +17,7 @@ interface StoreHeaderProps {
 
 export function StoreHeader({ store }: StoreHeaderProps) {
   const params = useParams();
-  const storeSlug = params.slug as string;
+  const storeSlug = params.store as string;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

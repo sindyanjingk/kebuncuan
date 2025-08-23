@@ -20,14 +20,17 @@ model Customer {
 }
 
 model Store {
-  id        String     @id @default(cuid())
-  name      String
-  slug      String     @unique
-  ownerId   String
-  createdAt DateTime   @default(now())
-  customers Customer[]
-  products  Product[]
-  owner     User       @relation(fields: [ownerId], references: [id])
+  id         String        @id @default(cuid())
+  name       String
+  slug       String        @unique
+  ownerId    String
+  createdAt  DateTime      @default(now())
+  templateId String?
+  customers  Customer[]
+  products   Product[]
+  owner      User          @relation(fields: [ownerId], references: [id])
+  template   Template?     @relation(fields: [templateId], references: [id])
+  settings   StoreSetting?
 }
 
 model User {
@@ -126,6 +129,109 @@ model BalanceTopUp {
   user      User          @relation(fields: [userId], references: [id])
 }
 
+model Template {
+  id                String             @id @default(cuid())
+  name              String
+  category          TemplateCategory
+  description       String
+  previewImage      String
+  thumbnailImage    String
+  isActive          Boolean            @default(true)
+  isPremium         Boolean            @default(false)
+  price             Float              @default(0)
+  features          Json
+  config            Json
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  featuresConfig    FeaturesConfig[]
+  heroConfig        HeroConfig?
+  socialProofConfig SocialProofConfig?
+  stores            Store[]
+}
+
+model HeroConfig {
+  id              String   @id @default(cuid())
+  templateId      String   @unique
+  headline        String
+  subheadline     String
+  ctaText         String
+  ctaUrl          String
+  backgroundImage String?
+  backgroundVideo String?
+  overlayOpacity  Float    @default(0.3)
+  textAlignment   String   @default("center")
+  showStats       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  template        Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model FeaturesConfig {
+  id          String   @id @default(cuid())
+  templateId  String
+  title       String
+  description String
+  icon        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+}
+
+model SocialProofConfig {
+  id               String        @id @default(cuid())
+  templateId       String        @unique
+  showTestimonials Boolean       @default(true)
+  showPartnerLogos Boolean       @default(true)
+  showUserCount    Boolean       @default(true)
+  showRatings      Boolean       @default(true)
+  userCountText    String        @default("Dipercaya 1000+ pengguna")
+  averageRating    Float         @default(4.8)
+  totalReviews     Int           @default(1200)
+  createdAt        DateTime      @default(now())
+  template         Template      @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  testimonials     Testimonial[]
+}
+
+model Testimonial {
+  id             String            @id @default(cuid())
+  socialProofId  String
+  customerName   String
+  customerAvatar String?
+  customerTitle  String?
+  content        String
+  rating         Int               @default(5)
+  isActive       Boolean           @default(true)
+  order          Int               @default(0)
+  createdAt      DateTime          @default(now())
+  socialProof    SocialProofConfig @relation(fields: [socialProofId], references: [id], onDelete: Cascade)
+
+  @@index([socialProofId])
+}
+
+model StoreSetting {
+  id             String   @id @default(cuid())
+  storeId        String   @unique
+  primaryColor   String   @default("#2563eb")
+  secondaryColor String   @default("#64748b")
+  accentColor    String   @default("#10b981")
+  fontFamily     String   @default("Inter")
+  logoUrl        String?
+  faviconUrl     String?
+  customCss      String?
+  customJs       String?
+  socialLinks    Json?
+  seoConfig      Json?
+  contactInfo    Json?
+  paymentMethods Json?
+  shippingConfig Json?
+  customization  Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
 enum ProductType {
   PPOB
   SMM
@@ -144,4 +250,14 @@ enum PaymentStatus {
   UNPAID
   PAID
   FAILED
+}
+
+enum TemplateCategory {
+  MARKETPLACE
+  ECOMMERCE
+  FASHION
+  FOOD
+  ELECTRONICS
+  SERVICES
+  GENERAL
 }

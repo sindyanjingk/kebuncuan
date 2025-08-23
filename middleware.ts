@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const subdomain = match ? match[1] : null
   const url = request.nextUrl
   if (subdomain && subdomain !== "www") {
-    // Rewrite ke /domain/[slug]/home (atau /domain/[slug] jika ingin root)
+    // Rewrite ke /domain/[store]/home (atau /domain/[store] jika ingin root)
     url.pathname = `/domain/${subdomain}/home${url.pathname === "/" ? "" : url.pathname}`
     return NextResponse.rewrite(url)
   }

@@ -17,7 +17,7 @@ interface Product {
 
 export default function ProductsPage() {
   const params = useParams();
-  const storeSlug = params.slug as string;
+  const storeSlug = params.store as string;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 

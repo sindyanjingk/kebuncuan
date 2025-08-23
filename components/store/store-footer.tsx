@@ -18,7 +18,7 @@ interface StoreFooterProps {
 
 export function StoreFooter({ store }: StoreFooterProps) {
   const params = useParams();
-  const storeSlug = params.slug as string;
+  const storeSlug = params.store as string;
   const currentYear = new Date().getFullYear();
 
   return (
