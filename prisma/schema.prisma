@@ -68,8 +68,12 @@ model Product {
   id          String           @id @default(cuid())
   name        String
   description String
-  price       Float
+  price       Float            // Harga jual (customer price)
+  modalPrice  Float            @default(0) // Harga modal (cost price)
+  productType ProductType      @default(PPOB) // Tipe produk: PHYSICAL atau DIGITAL
   createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt @default(now())
+  deletedAt   DateTime?        // Soft delete field
   active      Boolean          @default(true)
   categoryId  String
   storeId     String
@@ -268,6 +272,8 @@ model CartItem {
 }
 
 enum ProductType {
+  PHYSICAL          // Produk fisik - perlu pengiriman
+  DIGITAL           // Produk digital - tidak perlu pengiriman
   PPOB
   SMM
   VOUCHER

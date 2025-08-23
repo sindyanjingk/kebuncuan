@@ -508,9 +508,23 @@ export default async function Page({ params }: { params: { store: string } }) {
                         {/* Overlay gradient for better text readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3 flex flex-col gap-1">
                           <Badge variant={product.active ? "default" : "secondary"} className="shadow-sm backdrop-blur-sm">
                             {product.active ? '✅ Ready' : '⏳ Soon'}
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`shadow-sm backdrop-blur-sm border-white/50 ${
+                              product.productType === "PHYSICAL" 
+                                ? "bg-blue-500/80 text-white" 
+                                : product.productType === "DIGITAL"
+                                ? "bg-green-500/80 text-white"
+                                : "bg-gray-500/80 text-white"
+                            }`}
+                          >
+                            {product.productType === "PHYSICAL" ? "📦" :
+                             product.productType === "DIGITAL" ? "💾" :
+                             "⚡"}
                           </Badge>
                         </div>
                         {index === 0 && (

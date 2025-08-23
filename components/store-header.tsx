@@ -10,11 +10,12 @@ interface StoreHeaderProps {
 }
 
 export function StoreHeader({ storeData, storeSlug, session }: StoreHeaderProps) {
-  // Get colors from store settings
-  const primaryColor = storeData.settings?.colorScheme?.primary || storeData.settings?.hero?.backgroundColor || '#6366F1';
-  const secondaryColor = storeData.settings?.colorScheme?.secondary || '#8B5CF6';
-  const accentColor = storeData.settings?.colorScheme?.accent || '#A855F7';
-  const textColor = storeData.settings?.hero?.textColor || '#FFFFFF';
+  // Get colors from store settings with fallbacks
+  const settings = storeData.settings || {};
+  const primaryColor = settings.primaryColor || '#6366F1';
+  const secondaryColor = settings.secondaryColor || '#8B5CF6';
+  const accentColor = settings.accentColor || '#A855F7';
+  const textColor = '#FFFFFF';
 
   return (
     <header 
@@ -64,9 +65,7 @@ export function StoreHeader({ storeData, storeSlug, session }: StoreHeaderProps)
             </Link>
             
             {/* Products Dropdown */}
-            {storeData.settings?.products?.enabled !== false && (
-              <HeaderClient storeSlug={storeSlug} />
-            )}
+            <HeaderClient storeSlug={storeSlug} />
             
             {/* Categories */}
             <Link 
@@ -83,16 +82,6 @@ export function StoreHeader({ storeData, storeSlug, session }: StoreHeaderProps)
             >
               Tentang
             </Link>
-            
-            {/* Features (if enabled) */}
-            {storeData.settings?.features?.enabled && (
-              <a href="#features" className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105">Fitur</a>
-            )}
-            
-            {/* Testimonials (if enabled) */}
-            {storeData.settings?.testimonials?.enabled && (
-              <a href="#testimonials" className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105">Testimoni</a>
-            )}
             
             {/* Contact */}
             <a href="#contact" className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105">Kontak</a>

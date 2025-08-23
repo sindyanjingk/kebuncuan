@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:templates": "npx tsx prisma/seed-all-templates.ts",
+    "seed:categories": "npx tsx prisma/seed-categories.ts",
+    "seed:products": "npx tsx prisma/seed-products.ts",
+    "seed:all": "npm run seed:categories && npm run seed:templates"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

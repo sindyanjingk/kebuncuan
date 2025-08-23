@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { getDefaultStoreSettings } from "@/lib/store-settings"
 
 export async function GET(req: NextRequest) {
     try {
@@ -60,16 +61,35 @@ export async function POST(req: NextRequest) {
         if (existing) {
             return NextResponse.json({ error: "Slug sudah digunakan" }, { status: 400 })
         }
-        // Buat store
+        // Buat store dengan default settings
+        const defaultSettings = getDefaultStoreSettings({ storeName: name })
+        
         const store = await prisma.store.create({
             data: {
                 name,
                 slug,
                 ownerId: user.id,
-                templateId: templateId || null
+                templateId: templateId || 'clean-minimal', // Default template
+                settings: {
+                    create: defaultSettings
+                }
             },
+            include: {
+                settings: true,
+                template: true
+            }
         })
-        return NextResponse.json({ message: "Toko berhasil dibuat", slug: store.slug })
+        return NextResponse.json({ 
+            message: "Toko berhasil dibuat", 
+            slug: store.slug,
+            store: {
+                id: store.id,
+                name: store.name,
+                slug: store.slug,
+                hasSettings: !!store.settings,
+                template: store.template?.name
+            }
+        })
     } catch (error: any) {
         console.log({ error });
         return NextResponse.json({ message: "Terjadi kesalahan", error: error?.message || String(error) }, { status: 500 })

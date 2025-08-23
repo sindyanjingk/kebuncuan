@@ -19,6 +19,7 @@ export async function GET(req: Request) {
 
   const where: any = {
     store: { slug: store },
+    deletedAt: null, // Only show non-deleted products
     ...(search && { name: { contains: search, mode: "insensitive" } }),
     ...(category && { categoryId: category }),
   };
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
       orderBy: { [sort]: order },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { category: true, images : true },
+      include: { category: true, images : { orderBy: { order: 'asc' } } },
     }),
     prisma.product.count({ where }),
   ]);
@@ -44,11 +45,11 @@ export async function POST(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const body = await req.json();
-    const { name, description, price, categoryId, storeId, images } = body;
+    const { name, description, price, modalPrice, productType, categoryId, storeSlug, images = [] } = body;
     
     // Find store by slug
     const store = await prisma.store.findUnique({ 
-      where: { slug: storeId } // Using storeId as slug from the client
+      where: { slug: storeSlug }
     });
     
     if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 });
@@ -59,14 +60,16 @@ export async function POST(req: Request) {
         name,
         description,
         price: Number(price),
+        modalPrice: Number(modalPrice || 0),
+        productType: productType || 'DIGITAL',
         categoryId,
         storeId: store.id,
         active: true,
         images: {
           createMany: {
-            data: images.map((img: any, idx: number) => ({
-              url: img.url,
-              order: img.order || idx
+            data: images.map((imageUrl: string, index: number) => ({
+              url: imageUrl,
+              order: index
             }))
           }
         }
@@ -94,7 +97,7 @@ export async function PUT(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const body = await req.json();
-    const { id, name, description, price, categoryId, storeId, images } = body;
+    const { id, name, description, price, modalPrice, productType, categoryId, images = [] } = body;
 
     // Delete existing images first
     await prisma.productImage.deleteMany({
@@ -103,24 +106,29 @@ export async function PUT(req: Request) {
 
     // Update product with new images
     const product = await prisma.product.update({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null // Only update non-deleted products
+      },
       data: {
         name,
         description,
         price: Number(price),
+        modalPrice: Number(modalPrice || 0),
+        productType: productType || 'DIGITAL',
         categoryId,
         images: {
           createMany: {
-            data: images.map((img: any, idx: number) => ({
-              url: img.url,
-              order: img.order || idx
+            data: images.map((imageUrl: string, index: number) => ({
+              url: imageUrl,
+              order: index
             }))
           }
         }
       },
       include: {
         category: true,
-        images: true
+        images: { orderBy: { order: 'asc' } }
       }
     });
     
@@ -134,7 +142,7 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE: Delete product
+// DELETE: Soft delete product
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -142,17 +150,18 @@ export async function DELETE(req: Request) {
     
     const { id } = await req.json();
     
-    // Delete product images first
-    await prisma.productImage.deleteMany({
-      where: { productId: id }
+    // Soft delete the product by setting deletedAt
+    const product = await prisma.product.update({
+      where: { 
+        id,
+        deletedAt: null // Only delete non-deleted products
+      },
+      data: {
+        deletedAt: new Date()
+      }
     });
     
-    // Then delete the product
-    await prisma.product.delete({ 
-      where: { id } 
-    });
-    
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, product });
   } catch (error) {
     console.error("[PRODUCT_DELETE]", error);
     return NextResponse.json(

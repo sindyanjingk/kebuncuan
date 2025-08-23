@@ -16,6 +16,8 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  modalPrice?: number;
+  productType?: string;
   images: { url: string }[];
   category: { name: string } | null;
   active: boolean;
@@ -133,12 +135,28 @@ export default async function ProductDetailPage({
 
           {/* Product Info - Mostly Static */}
           <div className="space-y-6">
-            {/* Category */}
-            {product.category && (
-              <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                {product.category.name}
+            {/* Category and Product Type */}
+            <div className="flex flex-wrap gap-2">
+              {product.category && (
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                  {product.category.name}
+                </Badge>
+              )}
+              <Badge 
+                variant={product.productType === "PHYSICAL" ? "default" : "outline"}
+                className={
+                  product.productType === "PHYSICAL" 
+                    ? "bg-blue-100 text-blue-700" 
+                    : product.productType === "DIGITAL"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }
+              >
+                {product.productType === "PHYSICAL" ? "📦 Produk Fisik" :
+                 product.productType === "DIGITAL" ? "💾 Produk Digital" :
+                 product.productType || "Lainnya"}
               </Badge>
-            )}
+            </div>
             
             {/* Title and Rating */}
             <div>
@@ -172,35 +190,71 @@ export default async function ProductDetailPage({
             {/* Features */}
             <div className="bg-white rounded-xl p-6 shadow-sm border">
               <div className="grid grid-cols-1 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Gratis Ongkir</div>
-                    <div className="text-sm text-gray-600">Untuk pembelian minimal 50k</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Garansi Kualitas</div>
-                    <div className="text-sm text-gray-600">Produk original & berkualitas</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <RotateCcw className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Mudah Dikembalikan</div>
-                    <div className="text-sm text-gray-600">Kebijakan return 7 hari</div>
-                  </div>
-                </div>
+                {product.productType === "PHYSICAL" ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Truck className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Gratis Ongkir</div>
+                        <div className="text-sm text-gray-600">Untuk pembelian minimal 50k</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Garansi Kualitas</div>
+                        <div className="text-sm text-gray-600">Produk original & berkualitas</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <RotateCcw className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Mudah Dikembalikan</div>
+                        <div className="text-sm text-gray-600">Kebijakan return 7 hari</div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <ShoppingCart className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Instant Download</div>
+                        <div className="text-sm text-gray-600">Langsung dapat setelah pembayaran</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Garansi Selamanya</div>
+                        <div className="text-sm text-gray-600">Akses selamanya tanpa batas waktu</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Star className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">Kualitas Terjamin</div>
+                        <div className="text-sm text-gray-600">Konten berkualitas premium</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

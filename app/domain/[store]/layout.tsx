@@ -80,8 +80,8 @@ export default async function StoreLayout({
   return (
       <CartProvider session={session}>
         <div className="min-h-screen flex flex-col">
-          {/* Header */}
-          {storeData && storeData.template && storeData.settings && (
+          {/* Header - Always show if store exists */}
+          {storeData && (
             <StoreHeader storeData={storeData} storeSlug={params.store} session={session} />
           )}
           
