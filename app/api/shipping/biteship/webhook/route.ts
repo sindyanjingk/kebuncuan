@@ -2,11 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { OrderStatus, ShipmentStatus } from '@prisma/client';
 
+// GET method for testing webhook endpoint
+export async function GET() {
+  return NextResponse.json({ 
+    success: true,
+    message: 'Biteship webhook endpoint is working',
+    timestamp: new Date().toISOString()
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const notification = await request.json();
+    let notification;
+    
+    // Handle empty body or malformed JSON (for installation/testing)
+    try {
+      notification = await request.json();
+    } catch (error) {
+      console.log('Biteship webhook: Invalid or empty JSON body, responding OK for installation');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint is working - received invalid/empty JSON' 
+      });
+    }
     
     console.log('Biteship webhook received:', notification);
+
+    // Handle installation/test request (empty body or test data)
+    if (!notification || Object.keys(notification).length === 0) {
+      console.log('Biteship webhook installation/test request received');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint is working' 
+      });
+    }
 
     const { 
       order_id,
@@ -17,11 +46,13 @@ export async function POST(request: NextRequest) {
       tracking_id
     } = notification;
 
+    // For installation phase, accept requests without required fields
     if (!order_id || !status) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      console.log('Biteship webhook: Missing required fields, but responding OK for installation');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint received request but missing required fields' 
+      });
     }
 
     // Find shipment by biteship order_id

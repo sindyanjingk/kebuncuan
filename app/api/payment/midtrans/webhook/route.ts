@@ -10,15 +10,53 @@ const core = new midtransClient.CoreApi({
   clientKey: process.env.MIDTRANS_CLIENT_KEY!,
 });
 
+// GET method for testing webhook endpoint
+export async function GET() {
+  return NextResponse.json({ 
+    success: true,
+    message: 'Midtrans webhook endpoint is working',
+    timestamp: new Date().toISOString()
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const notification = await request.json();
+    let notification;
+    
+    // Handle empty body or malformed JSON (for installation/testing)
+    try {
+      notification = await request.json();
+    } catch (error) {
+      console.log('Midtrans webhook: Invalid or empty JSON body, responding OK for installation');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint is working - received invalid/empty JSON' 
+      });
+    }
+    
+    // Handle installation/test request (empty body or test data)
+    if (!notification || Object.keys(notification).length === 0) {
+      console.log('Midtrans webhook installation/test request received');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint is working' 
+      });
+    }
     
     const transactionStatus = notification.transaction_status;
     const fraudStatus = notification.fraud_status;
     const orderId = notification.order_id;
 
     console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`);
+
+    // For installation phase, accept requests without required fields
+    if (!transactionStatus || !orderId) {
+      console.log('Midtrans webhook: Missing required fields, but responding OK for installation');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Webhook endpoint received request but missing required fields' 
+      });
+    }
 
     let orderStatus: OrderStatus = OrderStatus.PENDING;
     let paymentStatus: PaymentStatus = PaymentStatus.UNPAID;
