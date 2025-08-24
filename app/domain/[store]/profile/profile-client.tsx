@@ -222,20 +222,45 @@ export function CustomerProfileClient({ storeSlug }: CustomerProfileClientProps)
     }
   }
 
+  const processOrder = async (orderId: string) => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/orders/${orderId}/process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (response.ok) {
+        toast.success('Pesanan berhasil diproses')
+        // Reload orders to show updated status
+        const ordersResponse = await fetch('/api/user/orders')
+        if (ordersResponse.ok) {
+          const data = await ordersResponse.json()
+          setOrders(data.orders || [])
+        }
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Gagal memproses pesanan')
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Pending</Badge>
-      case 'PAID':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Dibayar</Badge>
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Menunggu</Badge>
       case 'PROCESSING':
         return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Diproses</Badge>
       case 'SHIPPED':
         return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Dikirim</Badge>
-      case 'DELIVERED':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Sampai</Badge>
-      case 'CANCELLED':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">Dibatalkan</Badge>
+      case 'SUCCESS':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800">Selesai</Badge>
+      case 'FAILED':
+        return <Badge variant="secondary" className="bg-red-100 text-red-800">Gagal</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -553,7 +578,7 @@ export function CustomerProfileClient({ storeSlug }: CustomerProfileClientProps)
 
                             {/* Shipment Tracking */}
                             {order.shipment && (
-                              <div className="bg-purple-50 rounded-lg p-4">
+                              <div className="bg-purple-50 rounded-lg p-4 mb-4">
                                 <div className="flex items-center gap-2 mb-2">
                                   <Clock className="h-4 w-4 text-purple-600" />
                                   <span className="font-medium text-sm">Tracking Pengiriman</span>
@@ -562,6 +587,19 @@ export function CustomerProfileClient({ storeSlug }: CustomerProfileClientProps)
                                   <p><strong>Resi:</strong> {order.shipment.trackingNumber}</p>
                                   <p><strong>Status:</strong> {order.shipment.status}</p>
                                 </div>
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            {order.status === 'PENDING' && order.payment && order.payment.status === 'PAID' && (
+                              <div className="flex justify-end pt-4 border-t">
+                                <Button 
+                                  onClick={() => processOrder(order.id)}
+                                  disabled={loading}
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  {loading ? 'Memproses...' : 'Proses Pesanan'}
+                                </Button>
                               </div>
                             )}
                           </CardContent>

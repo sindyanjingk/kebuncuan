@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { BiteshipAPI } from '@/lib/biteship'
+import { OrderStatus } from '@prisma/client'
 
 export async function POST(
   request: Request,
@@ -126,6 +127,14 @@ export async function POST(
         recipient_postal_code: order.shipping_postal_code || '12345',
         weight: 1000,
         price: order.shipping_cost || 0
+      }
+    })
+
+    // Update order status to SHIPPED
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: OrderStatus.SHIPPED // Order is now shipped
       }
     })
 

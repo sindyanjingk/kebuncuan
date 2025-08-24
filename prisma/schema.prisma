@@ -333,9 +333,10 @@ enum ProductType {
 
 enum OrderStatus {
   PENDING
+  PROCESSING
+  SHIPPED
   SUCCESS
   FAILED
-  PROCESSING
 }
 
 enum PaymentStatus {

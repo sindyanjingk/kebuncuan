@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
         orderStatus = OrderStatus.PENDING;
         paymentStatus = PaymentStatus.UNPAID;
       } else if (fraudStatus === 'accept') {
-        orderStatus = OrderStatus.SUCCESS;
+        orderStatus = OrderStatus.PENDING; // Changed: Keep PENDING after payment, will be PROCESSING when user confirms
         paymentStatus = PaymentStatus.PAID;
       }
     } else if (transactionStatus === 'settlement') {
-      orderStatus = OrderStatus.SUCCESS;
+      orderStatus = OrderStatus.PENDING; // Changed: Keep PENDING after payment, will be PROCESSING when user confirms
       paymentStatus = PaymentStatus.PAID;
     } else if (transactionStatus === 'cancel' ||
       transactionStatus === 'deny' ||
