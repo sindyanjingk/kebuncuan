@@ -57,7 +57,7 @@ export function RegisterClient({ store }: RegisterClientProps) {
         password: data.password,
       });
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         toast.success("Akun berhasil dibuat! Silakan login.");
         router.push(`/login`);
       }

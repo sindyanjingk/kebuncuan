@@ -9,8 +9,9 @@ import Link from "next/link"
 import { signIn } from "next-auth/react"
 import axios from 'axios'
 import { toast } from "sonner"
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon, Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Nama terlalu pendek" }),
@@ -18,21 +19,27 @@ const registerSchema = z.object({
   password: z.string().min(6, { message: "Minimal 6 karakter" }),
 })
 
+type RegisterForm = z.infer<typeof registerSchema>
+
 export default function RegisterPage() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(registerSchema) })
+  } = useForm<RegisterForm>({ 
+    resolver: zodResolver(registerSchema),
+    mode: "onChange"
+  })
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: RegisterForm) => {
     console.log("Registering:", data)
     try {
       const response = await axios.post(`/api/register`, {
-        username: data?.name,
-        email: data?.email,
-        password: data?.password
+        username: data.name,
+        email: data.email,
+        password: data.password
       })
       if (response.status === 200) {
         toast.success(response.data?.message || "Success register user")
@@ -62,16 +69,46 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Input placeholder="Nama lengkap" {...register("name")} className="h-11" />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+            <Input 
+              placeholder="Nama lengkap" 
+              {...register("name")} 
+              className="h-11" 
+              autoComplete="name"
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
           </div>
           <div>
-            <Input placeholder="Email" {...register("email")} className="h-11" />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+            <Input 
+              type="email"
+              placeholder="Email" 
+              {...register("email")} 
+              className="h-11" 
+              autoComplete="email"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            )}
           </div>
-          <div>
-            <Input type="password" placeholder="Kata sandi" {...register("password")} className="h-11" />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+          <div className="relative">
+            <Input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Kata sandi" 
+              {...register("password")} 
+              className="h-11 pr-10" 
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            )}
           </div>
           <Button disabled={isSubmitting} type="submit" className="w-full mt-6 h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
             {

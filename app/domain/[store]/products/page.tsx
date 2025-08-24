@@ -25,7 +25,10 @@ interface Store {
 
 export default async function ProductsPage({ params }: { params: { store: string } }) {
   const store = await prisma.store.findUnique({
-    where: { slug: params.store },
+    where: { 
+      slug: params.store,
+      deletedAt: null // Only show non-deleted stores
+    },
     select: {
       id: true,
       name: true,

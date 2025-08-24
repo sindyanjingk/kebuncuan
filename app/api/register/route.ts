@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
-    const { username, email, password, slug } = await req.json();
-    if (!username || !email || !password) {
+    const { name, email, password, slug } = await req.json();
+    if (!name || !email || !password) {
       return NextResponse.json({ error: "Semua field wajib diisi" }, { status: 400 });
     }
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     // Simpan user baru
     const user = await prisma.user.create({
-      data: { username, email, passwordHash: hashedPassword },
+      data: { username : name, email, passwordHash: hashedPassword },
     });
 
     // Jika slug ada, tambahkan ke tabel customer
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           data: {
             storeId: store.id,
             userId: user.id,
-            name: username,
+            name,
             email,
           },
         });

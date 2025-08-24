@@ -11,7 +11,10 @@ export async function POST(
 
     // Find the store
     const store = await prisma.store.findFirst({
-      where: { slug: storeSlug },
+      where: { 
+        slug: storeSlug,
+        deletedAt: null // Only allow customization of non-deleted stores
+      },
       include: { template: true }
     })
 
@@ -50,7 +53,10 @@ export async function GET(
 
     // Find the store with settings
     const store = await prisma.store.findFirst({
-      where: { slug: storeSlug },
+      where: { 
+        slug: storeSlug,
+        deletedAt: null // Only allow access to non-deleted stores
+      },
       include: {
         settings: true
       }

@@ -16,7 +16,10 @@ export default async function CartPage({ params }: { params: { store: string } }
 
   // Get store
   const store = await prisma.store.findUnique({
-    where: { slug: params.store },
+    where: { 
+      slug: params.store,
+      deletedAt: null // Only show non-deleted stores
+    },
     select: { id: true, name: true, slug: true }
   });
 

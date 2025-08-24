@@ -204,9 +204,8 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="brand" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="brand">Brand</TabsTrigger>
+      <Tabs defaultValue="hero" className="w-full">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="products">Produk</TabsTrigger>
           <TabsTrigger value="features">Fitur</TabsTrigger>
@@ -216,55 +215,7 @@ export function CustomizationForm({ store }: CustomizationFormProps) {
           <TabsTrigger value="colors">Warna</TabsTrigger>
         </TabsList>
 
-        {/* Brand Section Tab */}
-        <TabsContent value="brand" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>🎨 Brand Identity</CardTitle>
-              <CardDescription>Upload logo dan favicon untuk identitas toko Anda</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ImageUploader
-                  label="Logo Toko"
-                  currentImage={settings.brand.logoUrl}
-                  onImageChange={(url) => 
-                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, logoUrl: url } }))
-                  }
-                  accept="image/*"
-                  maxSize={5}
-                  recommended="Rekomendasi: 200x60px, format PNG/SVG dengan background transparan"
-                />
-                
-                <ImageUploader
-                  label="Favicon"
-                  currentImage={settings.brand.faviconUrl}
-                  onImageChange={(url) => 
-                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, faviconUrl: url } }))
-                  }
-                  accept="image/*"
-                  maxSize={1}
-                  recommended="Rekomendasi: 32x32px atau 16x16px, format ICO/PNG"
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <Label htmlFor="store-name">Nama Toko</Label>
-                <Input
-                  id="store-name"
-                  value={settings.brand.storeName}
-                  onChange={(e) => 
-                    setSettings(prev => ({ ...prev, brand: { ...prev.brand, storeName: e.target.value } }))
-                  }
-                  placeholder="Nama toko Anda"
-                />
-                <p className="text-xs text-gray-500">Nama ini akan ditampilkan di title browser dan berbagai tempat lainnya</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
         {/* Hero Section Tab */}
         <TabsContent value="hero" className="space-y-6">

@@ -5,7 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { IconUpload, IconX } from "@tabler/icons-react"
+import { Upload, X } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import Image from "next/image"
 
 interface Props {
@@ -18,6 +20,8 @@ export function AvatarUpload({ username, imageUrl, className }: Props) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const { update } = useSession()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -45,10 +49,19 @@ export function AvatarUpload({ username, imageUrl, className }: Props) {
         throw new Error("Upload failed")
       }
 
-      // Refresh the page to show the new image
-      window.location.reload()
+      const data = await response.json()
+      
+      // Update session with new image URL
+      await update({
+        image: data.imageUrl
+      })
+
+      toast.success("Foto profile berhasil diperbarui!")
+      setOpen(false)
+      clearSelectedImage()
     } catch (error) {
       console.error("Error uploading image:", error)
+      toast.error("Gagal mengupload foto profile")
     } finally {
       setIsUploading(false)
     }
@@ -63,18 +76,20 @@ export function AvatarUpload({ username, imageUrl, className }: Props) {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <Avatar className={className}>
-          <AvatarImage src={imageUrl || undefined} />
-          <AvatarFallback className="text-4xl">
-            {username[0]?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <div className="cursor-pointer">
+          <Avatar className={className}>
+            <AvatarImage src={imageUrl || undefined} />
+            <AvatarFallback className="text-lg">
+              {username[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Profile Picture</DialogTitle>
+          <DialogTitle>Update Foto Profile</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex justify-center">
@@ -91,7 +106,7 @@ export function AvatarUpload({ username, imageUrl, className }: Props) {
                   onClick={clearSelectedImage}
                   className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
                 >
-                  <IconX size={16} />
+                  <X size={16} />
                 </button>
               </div>
             ) : null}
@@ -103,7 +118,7 @@ export function AvatarUpload({ username, imageUrl, className }: Props) {
                 disabled={isUploading}
                 className="w-full"
               >
-                <IconUpload className="mr-2 h-4 w-4" />
+                <Upload className="mr-2 h-4 w-4" />
                 {isUploading ? "Uploading..." : "Upload Image"}
               </Button>
             ) : (

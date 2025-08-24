@@ -14,7 +14,10 @@ export default async function LoginPage({ params }: { params: { store: string } 
 
   // Get store info for branding
   const store = await prisma.store.findUnique({
-    where: { slug: params.store },
+    where: { 
+      slug: params.store,
+      deletedAt: null // Only show non-deleted stores
+    },
     select: {
       id: true,
       name: true,

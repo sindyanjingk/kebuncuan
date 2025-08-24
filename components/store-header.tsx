@@ -66,25 +66,6 @@ export function StoreHeader({ storeData, storeSlug, session }: StoreHeaderProps)
             
             {/* Products Dropdown */}
             <HeaderClient storeSlug={storeSlug} />
-            
-            {/* Categories */}
-            <Link 
-              href={`/categories`}
-              className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105"
-            >
-              Kategori
-            </Link>
-            
-            {/* About */}
-            <Link 
-              href={`/about`}
-              className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105"
-            >
-              Tentang
-            </Link>
-            
-            {/* Contact */}
-            <a href="#contact" className="text-white/90 hover:text-white transition-all duration-300 font-medium drop-shadow-sm hover:drop-shadow-lg transform hover:scale-105">Kontak</a>
           </nav>
           
           <NavbarAuth session={session} storeSlug={storeData.slug} />

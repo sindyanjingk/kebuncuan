@@ -1,18 +1,18 @@
 "use client"
 
 import {
-  IconCirclePlusFilled,
-  IconMail,
   IconBox,
   IconLayoutDashboard,
   IconUsers,
   IconFileInvoice,
   IconReportAnalytics,
   IconPalette,
+  IconFiles,
+  IconSettings,
+  IconTruck,
 } from "@tabler/icons-react"
 
 import { useParams, usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -46,19 +46,34 @@ export function NavMain() {
       icon: IconFileInvoice,
     },
     {
+      title: "Pengiriman",
+      url: `/${storeSlug}/dashboard/shipping-dashboard`,
+      icon: IconTruck,
+    },
+    {
       title: "Pelanggan",
       url: `/${storeSlug}/dashboard/customers`,
       icon: IconUsers,
     },
     {
-      title: "Laporan",
-      url: `/${storeSlug}/dashboard/reports`,
-      icon: IconReportAnalytics,
+      title: "Halaman",
+      url: `/${storeSlug}/dashboard/pages`,
+      icon: IconFiles,
     },
+    // {
+    //   title: "Laporan",
+    //   url: `/${storeSlug}/dashboard/reports`,
+    //   icon: IconReportAnalytics,
+    // },
     {
       title: "Customize",
       url: `/${storeSlug}/dashboard/customize`,
       icon: IconPalette,
+    },
+    {
+      title: "Pengaturan",
+      url: `/${storeSlug}/dashboard/settings`,
+      icon: IconSettings,
     },
   ];
 

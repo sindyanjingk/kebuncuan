@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getDefaultStoreSettings } from "@/lib/store-settings"
+import { createDefaultStorePages } from "@/lib/store-pages"
 
 export async function GET(req: NextRequest) {
     try {
@@ -15,7 +16,10 @@ export async function GET(req: NextRequest) {
         }
 
         const store = await prisma.store.findUnique({
-            where: { slug },
+            where: { 
+                slug,
+                deletedAt: null // Only return non-deleted stores
+            },
             select: {
                 id: true,
                 name: true,
@@ -79,6 +83,10 @@ export async function POST(req: NextRequest) {
                 template: true
             }
         })
+
+        // Create default pages for the store
+        const pagesResult = await createDefaultStorePages(store.id, store.name)
+        
         return NextResponse.json({ 
             message: "Toko berhasil dibuat", 
             slug: store.slug,
@@ -87,7 +95,8 @@ export async function POST(req: NextRequest) {
                 name: store.name,
                 slug: store.slug,
                 hasSettings: !!store.settings,
-                template: store.template?.name
+                template: store.template?.name,
+                defaultPagesCreated: pagesResult.success ? pagesResult.created : 0
             }
         })
     } catch (error: any) {

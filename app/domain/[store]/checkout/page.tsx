@@ -14,10 +14,21 @@ export default async function CheckoutPage({ params }: { params: { store: string
     redirect(`/login`);
   }
 
-  // Get store
+  // Get store with full address information
   const store = await prisma.store.findUnique({
-    where: { slug: params.store },
-    select: { id: true, name: true, slug: true }
+    where: { 
+      slug: params.store,
+      deletedAt: null // Only show non-deleted stores
+    },
+    select: { 
+      id: true, 
+      name: true, 
+      slug: true,
+      address: true,
+      city: true,
+      province: true,
+      postalCode: true
+    }
   });
 
   if (!store) {
@@ -81,5 +92,5 @@ export default async function CheckoutPage({ params }: { params: { store: string
     );
   }
 
-  return <CheckoutClient initialCart={cart} storeSlug={params.store} initialUser={session.user} />;
+  return <CheckoutClient initialCart={cart} storeSlug={params.store} initialUser={session.user} store={store} />;
 }

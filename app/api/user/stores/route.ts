@@ -9,7 +9,16 @@ export async function GET(req: Request) {
   }
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { stores: true },
+    include: { 
+      stores: {
+        where: {
+          deletedAt: null // Only include non-deleted stores
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }
+    },
   })
   if (!user) {
     return NextResponse.json({ error: "User tidak ditemukan" }, { status: 404 })

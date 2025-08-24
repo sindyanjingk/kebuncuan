@@ -2,7 +2,7 @@
 import { Session } from "next-auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ShoppingCart, LogOut } from "lucide-react";
+import { ShoppingCart, LogOut, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 
 interface NavbarAuthProps {
@@ -24,6 +24,13 @@ export function NavbarAuth({ session, storeSlug }: NavbarAuthProps) {
     <div className="flex items-center gap-3">
       {session ? (
         <div className="flex items-center gap-3">
+          {/* Profile Button */}
+          <Link href={`/profile`}>
+            <Button variant="ghost" size="sm" className="text-white hover:text-purple-200" title="Profile">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
+          
           {/* Cart Button */}
           <Link href={`/cart`} className="relative">
             <Button variant="ghost" size="sm" className="text-white hover:text-purple-200">

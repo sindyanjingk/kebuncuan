@@ -19,7 +19,7 @@ import {
   UsersIcon,
 } from "lucide-react"
 
-import { NavDocuments } from "@/components/nav-documents"
+// import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -157,8 +157,8 @@ export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Si
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavDocuments />
-        <NavSecondary  className="mt-auto" />
+        {/* <NavDocuments /> */}
+        {/* <NavSecondary  className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser session={session} />

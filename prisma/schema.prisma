@@ -25,15 +25,25 @@ model Store {
   slug       String        @unique
   ownerId    String
   createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt @default(now())
+  deletedAt  DateTime?     // Soft delete field (null by default)
   templateId String?
   logoUrl    String?
   faviconUrl String?
+  // Store address fields for Biteship integration
+  address    String?       // Store address
+  city       String?       // City name
+  province   String?       // Province name
+  postalCode String?       // Postal/ZIP code
+  phone      String?       // Store phone number
   customers  Customer[]
   products   Product[]
   carts      Cart[]
+  pages      StorePage[]
   owner      User          @relation(fields: [ownerId], references: [id])
   template   Template?     @relation(fields: [templateId], references: [id])
   settings   StoreSetting?
+  shippingProvider ShippingProvider?
 }
 
 model User {
@@ -44,6 +54,13 @@ model User {
   passwordHash String
   username     String
   imageUrl     String?
+  // User contact and address fields
+  phone        String?
+  address      String?
+  city         String?
+  province     String?
+  postalCode   String?
+  country      String?        @default("Indonesia")
   topUps       BalanceTopUp[]
   customers    Customer[]
   orders       Order[]
@@ -105,9 +122,23 @@ model Order {
   productId String
   response  Json?
   target    String
+  
+  // Shipping information
+  shipping_required   Boolean  @default(false)
+  shipping_address    String?
+  shipping_city       String?
+  shipping_province   String?
+  shipping_postal_code String?
+  shipping_phone      String?
+  shipping_name       String?
+  shipping_cost       Int?     // in cents
+  shipping_courier    String?  // JNE, TIKI, etc
+  shipping_service    String?  // REG, YES, etc
+  
   product   Product     @relation(fields: [productId], references: [id])
   user      User        @relation(fields: [userId], references: [id])
   payment   Payment?
+  shipment  Shipment?
 }
 
 model Payment {
@@ -241,6 +272,26 @@ model StoreSetting {
   store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }
 
+model StorePage {
+  id          String        @id @default(cuid())
+  storeId     String
+  type        StorePageType
+  title       String
+  slug        String
+  content     String        @db.Text
+  metaTitle   String?
+  metaDesc    String?
+  isActive    Boolean       @default(true)
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([storeId, type])
+}
+
 model Cart {
   id        String     @id @default(cuid())
   userId    String
@@ -301,4 +352,95 @@ enum TemplateCategory {
   ELECTRONICS
   SERVICES
   GENERAL
+}
+
+enum StorePageType {
+  ABOUT_US          // Tentang Kami
+  FAQ               // FAQ
+  BLOG              // Blog  
+  CAREER            // Karir
+  HELP_CENTER       // Pusat Bantuan
+  CONTACT_US        // Hubungi Kami
+  RETURN_POLICY     // Kebijakan Pengembalian
+  WARRANTY_CLAIM    // Garansi & Klaim
+  TRACK_ORDER       // Lacak Pesanan
+  TERMS_CONDITIONS  // Syarat dan Ketentuan
+  PRIVACY_POLICY    // Kebijakan Privasi
+  SITEMAP           // Sitemap
+}
+
+// Biteship Integration Models
+model ShippingProvider {
+  id              String           @id @default(cuid())
+  storeId         String
+  is_active       Boolean         @default(true)
+  origin_area_id  String?         // Biteship area ID for store location
+  
+  // Usage tracking for centralized API key
+  monthly_usage   Int             @default(0)
+  quota_limit     Int             @default(50)  // 50 requests per month default
+  last_reset      DateTime        @default(now())
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  store           Store           @relation(fields: [storeId], references: [id])
+  shipments       Shipment[]
+  
+  @@unique([storeId])
+}
+
+model Shipment {
+  id                  String            @id @default(cuid())
+  orderId             String            @unique
+  providerId          String
+  biteship_order_id   String?           // ID from Biteship
+  waybill             String?           // Resi/tracking number
+  status              ShipmentStatus    @default(PENDING)
+  
+  // Shipping details
+  courier_company     String?           // JNE, TIKI, etc
+  courier_type        String?           // REG, YES, ONS, etc
+  origin_area_id      String?
+  destination_area_id String?
+  
+  // Recipient info
+  recipient_name      String
+  recipient_phone     String
+  recipient_address   String
+  recipient_postal_code String
+  
+  // Package info
+  weight              Int               // in grams
+  length              Int?              // in cm
+  width               Int?              // in cm  
+  height              Int?              // in cm
+  price               Int               // shipping cost in cents
+  
+  // Tracking
+  tracking_events     Json?             // Array of tracking events from Biteship
+  estimated_delivery  DateTime?
+  actual_delivery     DateTime?
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  
+  order               Order             @relation(fields: [orderId], references: [id])
+  provider            ShippingProvider  @relation(fields: [providerId], references: [id])
+  
+  @@index([biteship_order_id])
+  @@index([waybill])
+  @@index([status])
+}
+
+enum ShipmentStatus {
+  PENDING           // Belum diproses
+  CONFIRMED         // Dikonfirmasi
+  ALLOCATED         // Dialokasikan ke kurir
+  PICKING_UP        // Sedang dijemput
+  PICKED_UP         // Sudah dijemput
+  DROPPING_OFF      // Sedang diantar
+  DELIVERED         // Terkirim
+  RETURNED          // Dikembalikan
+  CANCELLED         // Dibatalkan
+  ON_HOLD          // Ditahan
 }
